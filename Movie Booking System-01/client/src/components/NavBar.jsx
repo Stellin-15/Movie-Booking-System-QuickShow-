@@ -26,10 +26,10 @@ const NavBar = () => {
 
         <XIcon className="md:hidden absolute top-6 right-6 w-6 h-6 cursor-pointer" onClick ={()=> setIsOpen(!isOpen)}/>
         <Link className = 'block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-red-500' onClick ={()=> {scrollTo(0,0), setIsOpen(false)}} to="/">Home</Link>
-        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0), setIsOpen(false)}} to="/movies">Movies</Link>
-        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0), setIsOpen(false)}} to="/">Theaters</Link>
-        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0), setIsOpen(false)}} to="/">Releases</Link>
-        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0), setIsOpen(false)}} to="/favorites">Favorites</Link>
+        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0);  setIsOpen(false)}} to="/movies">Movies</Link>
+        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0); setIsOpen(false)}} to="/">Theaters</Link>
+        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0); setIsOpen(false)}} to="/">Releases</Link>
+        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0); setIsOpen(false)}} to="/favorites">Favorites</Link>
       </div>
 
       <div className="flex items-center gap-8">
