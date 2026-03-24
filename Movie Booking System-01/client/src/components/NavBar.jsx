@@ -1,63 +1,95 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { assets } from "../assets/assets";
-import { MenuIcon,SearchIcon,XIcon,TicketPlus} from "lucide-react";
-import {useUser,useClerk, UserButton} from "@clerk/clerk-react";
+import React, { useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useUser, useClerk, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
+import { MenuIcon, XIcon, SearchIcon, Film, BookOpen, Users, Clapperboard } from 'lucide-react'
+
+const NAV_LINKS = [
+  { label: 'Home', path: '/' },
+  { label: 'Movies', path: '/movies' },
+  { label: 'Discover', path: '/discover', authRequired: true },
+  { label: 'Lists', path: '/lists' },
+  { label: 'Feed', path: '/feed', authRequired: true },
+]
 
 const NavBar = () => {
+  const [isOpen, setIsOpen] = useState(false)
+  const { isSignedIn } = useUser()
+  const { openSignIn } = useClerk()
+  const location = useLocation()
+  const navigate = useNavigate()
 
-  const [isOpen, setIsOpen] = React.useState(false);
-  const {user} = useUser();
-  const {openSignIn} = useClerk();
-  let buttonEffect = 'block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-red-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent'
+  const isActive = (path) => location.pathname === path
 
-  const navigate = useNavigate();
+  const handleNavClick = (link) => {
+    if (link.authRequired && !isSignedIn) { openSignIn(); return }
+    navigate(link.path)
+    setIsOpen(false)
+    window.scrollTo(0, 0)
+  }
 
   return (
-    <div
-      className="fixed top-0 left-0 z-50 w-full flex items-center 
-    justify-between px-6 md:px-16 lg:px-36 py-5"
-    >
-      <Link to="/" className="max:md:flex-1">
-        <img src={assets.logo} alt="Logo" className="w-36 h-auto" />
+    <div className="fixed top-0 left-0 z-50 w-full flex items-center justify-between px-6 md:px-16 lg:px-24 py-4 bg-black/80 backdrop-blur-md border-b border-white/5">
+      {/* Logo */}
+      <Link to="/" onClick={() => window.scrollTo(0, 0)} className="flex items-center gap-2">
+        <Clapperboard className="w-6 h-6 text-primary" />
+        <span className="text-xl font-bold tracking-tight text-white">Cine<span className="text-primary">AI</span></span>
       </Link>
 
-      <div className={`max-md:absolute max-md:top-0 max-md:left-0 max-md:font-medium max-md:text-lg z-50 flex flex-col md:flex-row items-center max-md:justify-center gap-8 min-md:px-8 py-3 max-md:h-screen min-md:rounded-full backdrop-blur bg-black/70 md:bg-white/10 md:border border-gray-300/20 overflow-hidden transition-[width] duration-300 ${isOpen ? "max-md:w-full" : "max-md:w-0"}`}>
-
-        <XIcon className="md:hidden absolute top-6 right-6 w-6 h-6 cursor-pointer" onClick ={()=> setIsOpen(!isOpen)}/>
-        <Link className = 'block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-red-500' onClick ={()=> {scrollTo(0,0), setIsOpen(false)}} to="/">Home</Link>
-        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0);  setIsOpen(false)}} to="/movies">Movies</Link>
-        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0); setIsOpen(false)}} to="/">Theaters</Link>
-        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0); setIsOpen(false)}} to="/">Releases</Link>
-        <Link className = {buttonEffect} onClick ={()=> {scrollTo(0,0); setIsOpen(false)}} to="/favorites">Favorites</Link>
-      </div>
-
-      <div className="flex items-center gap-8">
-        <SearchIcon className = 'max:md:ml-4 md:hidden w-8 h-8 cursor-pointer'/>
-        {
-          !user ? (
-            <button onClick = {openSignIn} className="px-4 py-1 sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull transition rounded-full font-medium">
-              Login
+      {/* Desktop nav */}
+      <ul className="hidden md:flex items-center gap-1">
+        {NAV_LINKS.map(link => (
+          <li key={link.path}>
+            <button
+              onClick={() => handleNavClick(link)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                isActive(link.path) ? 'bg-primary/20 text-primary' : 'text-white/70 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {link.label}
             </button>
-          ) : (<UserButton>
+          </li>
+        ))}
+      </ul>
 
-                <UserButton.MenuItems>
+      {/* Right */}
+      <div className="flex items-center gap-3">
+        <button onClick={() => { navigate('/search'); setIsOpen(false) }} className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-all">
+          <SearchIcon className="w-5 h-5" />
+        </button>
 
-                  <UserButton.Action label ="My Bookings" labelIcon = {<TicketPlus width={15}/>} onClick = {()=> navigate('/My-Bookings')}/>
-                </UserButton.MenuItems>
+        <SignedOut>
+          <button onClick={() => openSignIn()} className="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary-dull text-white rounded-full transition-all">
+            Sign In
+          </button>
+        </SignedOut>
 
-            </UserButton>
-            )
-        }
+        <SignedIn>
+          <UserButton afterSignOutUrl="/">
+            <UserButton.MenuItems>
+              <UserButton.Action label="My Library" labelIcon={<BookOpen width={15} />} onClick={() => navigate('/library')} />
+              <UserButton.Action label="Friends" labelIcon={<Users width={15} />} onClick={() => navigate('/friends')} />
+              <UserButton.Action label="Marathon Room" labelIcon={<Film width={15} />} onClick={() => navigate('/marathon')} />
+            </UserButton.MenuItems>
+          </UserButton>
+        </SignedIn>
 
-        
+        <button className="md:hidden p-2 text-white/60 hover:text-white" onClick={() => setIsOpen(o => !o)}>
+          {isOpen ? <XIcon className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
+        </button>
       </div>
 
-      <MenuIcon className="max:md:ml-4 md:hidden w-8 h-8 cursor-pointer" onClick ={()=> setIsOpen(!isOpen)}/>
+      {/* Mobile menu */}
+      {isOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-md border-b border-white/10 py-2">
+          {NAV_LINKS.map(link => (
+            <button key={link.path} onClick={() => handleNavClick(link)} className={`w-full text-left px-6 py-3 text-sm font-medium transition-colors ${isActive(link.path) ? 'text-primary' : 'text-white/70 hover:text-white'}`}>
+              {link.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
+  )
+}
 
-  );
-};
-
-export default NavBar;
-
+export default NavBar
